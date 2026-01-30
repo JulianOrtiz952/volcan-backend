@@ -1,0 +1,13 @@
+asgiref
+django
+django-cors-headers
+django-filter
+djangorestframework
+markdown
+sqlparse
+
+gunicorn
+dj-database-url
+psycopg2-binary
+
+# Comando de inicio: gunicorn config.wsgi:application

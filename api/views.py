@@ -1,8 +1,23 @@
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions, status, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
 from .models import Project, Task, Subtask
-from .serializers import ProjectSerializer, TaskSerializer, SubtaskSerializer, CommunityProjectSerializer
+from .serializers import ProjectSerializer, TaskSerializer, SubtaskSerializer, CommunityProjectSerializer, RegisterSerializer, UserSerializer
+
+class RegisterView(generics.CreateAPIView):
+    serializer_class = RegisterSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            "user": UserSerializer(user).data,
+            "token": token.key
+        }, status=status.HTTP_201_CREATED)
 
 class ProjectViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]

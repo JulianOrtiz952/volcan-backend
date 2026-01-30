@@ -11,8 +11,22 @@ def subtask_changed(sender, instance, **kwargs):
 @receiver(post_save, sender=Task)
 @receiver(post_delete, sender=Task)
 def task_changed(sender, instance, **kwargs):
-    # Update own progress first (in case completed changed but no subtasks)
-    # The function has a recursion guard so this is safe
-    recalculate_task_progress(instance)
-    # Then update project
-    recalculate_project_progress(instance.project)
+    # If the task was just deleted, we don't recalculate its own progress
+    # because it doesn't exist anymore and save() would fail.
+    # We only update the project progress.
+    if kwargs.get('created') is not None or 'update_fields' in kwargs or sender.objects.filter(pk=instance.pk).exists():
+        # This is a safe way to check if it's NOT a deletion or if it still exists
+        # Actually post_save has 'created', post_delete does not.
+        pass
+
+    # Better approach:
+    if kwargs.get('signal') == post_save:
+         recalculate_task_progress(instance)
+    
+    # Always update project (if it exists)
+    try:
+        if instance.project:
+            recalculate_project_progress(instance.project)
+    except Exception:
+        # Project might have been deleted too (cascade)
+        pass

@@ -28,13 +28,21 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-cd*kriddv0*f6$$10u#v@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",") if not DEBUG else ["*"]
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]
 
-CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",") if not DEBUG else [
-    "http://localhost:5173",
-]
+# CORS & CSRF
+# We explicitly allow the provided production frontend, plus any from env vars
+env_cors = [url.strip() for url in os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",") if url.strip()]
+CORS_ALLOWED_ORIGINS = env_cors + ["https://volcan-frontend.onrender.com"]
 
-CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if os.environ.get("CSRF_TRUSTED_ORIGINS") else []
+env_csrf = [url.strip() for url in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if url.strip()]
+CSRF_TRUSTED_ORIGINS = env_csrf + ["https://volcan-frontend.onrender.com"]
+
+if DEBUG:
+    CORS_ALLOWED_ORIGINS.append("http://localhost:5173")
+    CORS_ALLOWED_ORIGINS.append("http://127.0.0.1:5173")
 
 
 # Application definition

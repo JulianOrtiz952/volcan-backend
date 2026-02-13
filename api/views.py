@@ -21,7 +21,8 @@ class ProfileUpdateView(generics.UpdateAPIView):
     serializer_class = ProfileSerializer
 
     def get_object(self):
-        return self.request.user.profile
+        profile, created = Profile.objects.get_or_create(user=self.request.user)
+        return profile
 
 class ChangePasswordView(generics.UpdateAPIView):
     permission_classes = [permissions.IsAuthenticated]

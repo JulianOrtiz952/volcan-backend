@@ -11,7 +11,12 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
+    # For legacy users without a profile, we ensure it exists
+    # instead of crashing with RelatedObjectDoesNotExist
+    if not hasattr(instance, 'profile'):
+        Profile.objects.create(user=instance)
+    else:
+        instance.profile.save()
 
 @receiver(post_save, sender=Subtask)
 @receiver(post_delete, sender=Subtask)

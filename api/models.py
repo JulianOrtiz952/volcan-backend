@@ -59,3 +59,16 @@ class Subtask(models.Model):
 
     def __str__(self):
         return self.title
+
+class FocusSession(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='focus_sessions')
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name='focus_sessions')
+    tag = models.CharField(max_length=100)
+    start_time = models.DateTimeField(auto_now_add=True)
+    end_time = models.DateTimeField(null=True, blank=True)
+    duration_minutes = models.FloatField(default=0.0)
+    is_completed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.tag} ({self.duration_minutes} min)"
+

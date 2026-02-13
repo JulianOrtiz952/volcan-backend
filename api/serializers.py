@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Project, Task, Subtask, Profile
+from .models import Project, Task, Subtask, Profile, FocusSession
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -72,3 +72,13 @@ class CommunityProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = ['id', 'user_name', 'display_name', 'name', 'progress', 'status']
+
+class FocusSessionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FocusSession
+        fields = ['id', 'user', 'project', 'tag', 'start_time', 'end_time', 'duration_minutes', 'is_completed']
+        read_only_fields = ['id', 'user', 'start_time']
+
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)

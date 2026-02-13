@@ -2,11 +2,11 @@ from rest_framework import viewsets, permissions, status, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
-from .models import Project, Task, Subtask, Profile
+from .models import Project, Task, Subtask, Profile, FocusSession
 from .serializers import (
     ProjectSerializer, TaskSerializer, SubtaskSerializer, 
     CommunityProjectSerializer, RegisterSerializer, UserSerializer,
-    ProfileSerializer, ChangePasswordSerializer
+    ProfileSerializer, ChangePasswordSerializer, FocusSessionSerializer
 )
 
 class MeView(generics.RetrieveUpdateAPIView):
@@ -87,3 +87,41 @@ class SubtaskViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Subtask.objects.filter(task__project__user=self.request.user).order_by('created_at')
+
+class FocusSessionViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = FocusSessionSerializer
+
+    def get_queryset(self):
+        return FocusSession.objects.filter(user=self.request.user).order_by('-start_time')
+
+    @action(detail=False, methods=['get'])
+    def reports(self, request):
+        """
+        Get productivity reports aggregated by tag/project and daily stats.
+        """
+        sessions = self.get_queryset()
+        from django.db.models import Sum
+        from django.db.models.functions import TruncDate
+        from django.utils import timezone
+        from datetime import timedelta
+
+        # Aggregations by Tag and Project
+        tag_data = sessions.values('tag').annotate(total_minutes=Sum('duration_minutes'))
+        project_data = sessions.filter(project__isnull=False).values('project__name').annotate(total_minutes=Sum('duration_minutes'))
+        
+        # Daily stats for the last 365 days (for heatmap and histogram)
+        today = timezone.now().date()
+        one_year_ago = today - timedelta(days=365)
+        
+        daily_stats = sessions.filter(start_time__date__gte=one_year_ago) \
+            .annotate(date=TruncDate('start_time')) \
+            .values('date') \
+            .annotate(total_minutes=Sum('duration_minutes')) \
+            .order_by('date')
+
+        return Response({
+            "by_tag": tag_data,
+            "by_project": project_data,
+            "daily_stats": daily_stats
+        })

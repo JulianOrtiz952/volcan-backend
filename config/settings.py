@@ -18,6 +18,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 import os
 import dj_database_url
+from dotenv import load_dotenv
+
+# Load .env file if it exists
+load_dotenv()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -26,9 +30,10 @@ import dj_database_url
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-cd*kriddv0*f6$$10u#v@!63fv)znnd8li@69wz(g0$v@$2y_v")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", "False") == "True"
+# Parse DEBUG more robustly (accepts "True", "true", "1", "yes", etc. case-insensitive)
+DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "yes", "on")
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get("ALLOWED_HOSTS", "").split(",") if h.strip()]
 if DEBUG:
     ALLOWED_HOSTS = ["*"]
 

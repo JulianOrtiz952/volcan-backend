@@ -4,6 +4,14 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 User = get_user_model()
 
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    display_name = models.CharField(max_length=100, blank=True)
+    avatar_index = models.IntegerField(default=0) # Index for predefined avatars
+
+    def __str__(self):
+        return f"Profile of {self.user.username}"
+
 class Project(models.Model):
     STATUS_CHOICES = [
         ('PENDING', 'Pending'),

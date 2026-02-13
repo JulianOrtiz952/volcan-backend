@@ -5,6 +5,7 @@ django-filter
 djangorestframework
 markdown
 sqlparse
+python-dotenv
 
 gunicorn
 dj-database-url

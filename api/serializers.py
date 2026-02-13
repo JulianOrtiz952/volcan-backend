@@ -1,13 +1,25 @@
 from rest_framework import serializers
-from .models import Project, Task, Subtask
+from .models import Project, Task, Subtask, Profile
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['display_name', 'avatar_index']
+
 class UserSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer(read_only=True)
+
     class Meta:
         model = User
-        fields = ['id', 'username']
+        fields = ['id', 'username', 'profile']
+        read_only_fields = ['id']
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -40,11 +52,12 @@ class TaskSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     tasks = TaskSerializer(many=True, read_only=True)
     user_name = serializers.CharField(source='user.username', read_only=True)
+    display_name = serializers.CharField(source='user.profile.display_name', read_only=True)
 
     class Meta:
         model = Project
-        fields = ['id', 'user', 'user_name', 'name', 'description', 'status', 'progress', 'tasks', 'created_at']
-        read_only_fields = ['id', 'user', 'user_name', 'progress', 'created_at']
+        fields = ['id', 'user', 'user_name', 'display_name', 'name', 'description', 'status', 'progress', 'tasks', 'created_at']
+        read_only_fields = ['id', 'user', 'user_name', 'display_name', 'progress', 'created_at']
 
     def create(self, validated_data):
         # Auto-assign current user if context available
@@ -54,7 +67,8 @@ class ProjectSerializer(serializers.ModelSerializer):
 class CommunityProjectSerializer(serializers.ModelSerializer):
     """Simplified serializer for the public view"""
     user_name = serializers.CharField(source='user.username', read_only=True)
+    display_name = serializers.CharField(source='user.profile.display_name', read_only=True)
     
     class Meta:
         model = Project
-        fields = ['id', 'user_name', 'name', 'progress', 'status']
+        fields = ['id', 'user_name', 'display_name', 'name', 'progress', 'status']

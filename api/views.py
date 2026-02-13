@@ -2,8 +2,40 @@ from rest_framework import viewsets, permissions, status, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
-from .models import Project, Task, Subtask
-from .serializers import ProjectSerializer, TaskSerializer, SubtaskSerializer, CommunityProjectSerializer, RegisterSerializer, UserSerializer
+from .models import Project, Task, Subtask, Profile
+from .serializers import (
+    ProjectSerializer, TaskSerializer, SubtaskSerializer, 
+    CommunityProjectSerializer, RegisterSerializer, UserSerializer,
+    ProfileSerializer, ChangePasswordSerializer
+)
+
+class MeView(generics.RetrieveUpdateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserSerializer
+
+    def get_object(self):
+        return self.request.user
+
+class ProfileUpdateView(generics.UpdateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ProfileSerializer
+
+    def get_object(self):
+        return self.request.user.profile
+
+class ChangePasswordView(generics.UpdateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ChangePasswordSerializer
+
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = request.user
+        if not user.check_password(serializer.data.get("old_password")):
+            return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
+        user.set_password(serializer.data.get("new_password"))
+        user.save()
+        return Response({"status": "password set"}, status=status.HTTP_200_OK)
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer

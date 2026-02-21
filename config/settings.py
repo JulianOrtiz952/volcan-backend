@@ -34,6 +34,12 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-cd*kriddv0*f6$$10u#v@
 DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "yes", "on")
 
 ALLOWED_HOSTS = [h.strip() for h in os.environ.get("ALLOWED_HOSTS", "").split(",") if h.strip()]
+ALLOWED_HOSTS.append("volcan-backend.onrender.com")
+
+render_host = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+if render_host:
+    ALLOWED_HOSTS.append(render_host)
+
 if DEBUG:
     ALLOWED_HOSTS = ["*"]
 

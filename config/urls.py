@@ -19,8 +19,13 @@ from django.urls import path
 from django.urls import include
 from rest_framework.authtoken.views import obtain_auth_token
 from api.views import RegisterView
+from django.http import HttpResponse
+
+def health_check(request):
+    return HttpResponse("OK")
 
 urlpatterns = [
+    path('', health_check, name='health_check'),
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
     path('api/login/', obtain_auth_token, name='api_token_auth'),

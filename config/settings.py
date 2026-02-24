@@ -44,16 +44,19 @@ if DEBUG:
     ALLOWED_HOSTS = ["*"]
 
 # CORS & CSRF
-# We explicitly allow the provided production frontend, plus any from env vars
+CORS_ALLOW_ALL_ORIGINS = True # Temporary to debug/resolve production CORS issues
+CORS_ALLOW_CREDENTIALS = True
+
+# We still keep these for CSRF and explicit matching
 env_cors = [url.strip() for url in os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",") if url.strip()]
-CORS_ALLOWED_ORIGINS = env_cors + ["https://volcan-frontend.onrender.com"]
+CORS_ALLOWED_ORIGINS = env_cors + [
+    "https://volcan-frontend.onrender.com",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
 
 env_csrf = [url.strip() for url in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if url.strip()]
 CSRF_TRUSTED_ORIGINS = env_csrf + ["https://volcan-frontend.onrender.com"]
-
-if DEBUG:
-    CORS_ALLOWED_ORIGINS.append("http://localhost:5173")
-    CORS_ALLOWED_ORIGINS.append("http://127.0.0.1:5173")
 
 
 # Application definition

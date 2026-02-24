@@ -10,5 +10,5 @@ python-dotenv
 gunicorn
 dj-database-url
 psycopg2-binary
-
+whitenoise>=6.0.0
 # Comando de inicio: gunicorn config.wsgi:application

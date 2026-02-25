@@ -43,7 +43,7 @@ coolify_fqdn = os.environ.get("COOLIFY_FQDN")
 if coolify_fqdn:
     ALLOWED_HOSTS.append(coolify_fqdn)
 
-ALLOWED_HOSTS.extend(["localhost", "127.0.0.1", "0.0.0.0"])
+ALLOWED_HOSTS.extend(["volcan-backend-hetzner.com,178.156.245.214"])
 
 if DEBUG:
     ALLOWED_HOSTS = ["*"]

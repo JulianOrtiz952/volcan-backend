@@ -43,7 +43,15 @@ coolify_fqdn = os.environ.get("COOLIFY_FQDN")
 if coolify_fqdn:
     ALLOWED_HOSTS.append(coolify_fqdn)
 
-ALLOWED_HOSTS.extend(["volcan-backend-hetzner.com,178.156.245.214"])
+ALLOWED_HOSTS.extend([
+    "volcanzte.lat",
+    "api.volcanzte.lat",
+    "www.volcanzte.lat",
+    "178.156.245.214",
+    "localhost", 
+    "127.0.0.1", 
+    "0.0.0.0"
+])
 
 if DEBUG:
     ALLOWED_HOSTS = ["*"]
@@ -58,10 +66,16 @@ CORS_ALLOWED_ORIGINS = env_cors + [
     "https://volcan-frontend.onrender.com",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://volcanzte.lat",
+    "https://www.volcanzte.lat",
 ]
 
 env_csrf = [url.strip() for url in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if url.strip()]
-CSRF_TRUSTED_ORIGINS = env_csrf + ["https://volcan-frontend.onrender.com"]
+CSRF_TRUSTED_ORIGINS = env_csrf + [
+    "https://volcan-frontend.onrender.com",
+    "https://volcanzte.lat",
+    "https://www.volcanzte.lat",
+]
 
 
 # Application definition
@@ -169,6 +183,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+import os
+os.makedirs(STATIC_ROOT, exist_ok=True) 
+
 STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
